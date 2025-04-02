@@ -1,19 +1,66 @@
+// 1. 플러그인 설정
+// - java : 자바 프로젝트
+// - org.springframework.boot : 스프링 부트 프로젝트
+// - io.spring.dependency-management : 스프링 의존성 관리
 plugins {
     id 'java'
+    id 'org.springframework.boot' version '3.4.4'
+    id 'io.spring.dependency-management' version '1.1.7'
 }
 
-group = 'org.example'
-version = '1.0-SNAPSHOT'
+// 2. 프로젝트 정보 설정
+// - group : 프로젝트 그룹명
+// - version : 프로젝트 버전
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
 
+// 3. 자바 버전 설정
+// - toolchain : 자바 툴체인
+// - languageVersion : 자바 언어 버전
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+// 4. 의존성 설정
+// - configurations : 의존성 구성
+// - compileOnly : 컴파일 타임에만 사용
+// - annotationProcessor : 어노테이션 프로세서
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+// 5. 저장소 설정
+// - repositories : 저장소
+// - mavenCentral() : 메이븐 센트럴 저장소
 repositories {
     mavenCentral()
 }
 
+// 6. 의존성 추가
+// - dependencies : 의존성
+// - implementation : 컴파일 타임과 런타임에 모두 사용
+// - compileOnly : 컴파일 타임에만 사용
+// - annotationProcessor : 어노테이션 프로세서
+// - runtimeOnly : 런타임에만 사용
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
+    // 1. 스프링 웹
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    // 2. 롬복
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    // 3. mysql JDBC
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    // 4. JPA*
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 }
 
-test {
+// 7. 테스트 설정
+// - tasks.named('test') : 테스트 태스크
+// - useJUnitPlatform() : JUnit 플랫폼 사용
+tasks.named('test') {
     useJUnitPlatform()
 }
