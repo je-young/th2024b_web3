@@ -10,7 +10,7 @@ import lombok.Data;
 @Data // 롬복
 public class ExamEntity {
     @Id
-    private String id; // 1. 학번 , primaryh key
+    private String id; // 1. 학번 , primary key
 
     @Column(nullable = false)
     private String name; // 2. 이름 , not null

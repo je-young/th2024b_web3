@@ -36,7 +36,7 @@ public class ExamService {
     public boolean put2(ExamEntity examEntity) {
         // 1. id 해당하는 엔티티 찾기
         Optional<ExamEntity> optionalExamEntity = examEntityRepository.findById(examEntity.getId());
-        // 2. 만약에 조회ㅓ한 엔티티가 있으면 .isPresent()
+        // 2. 만약에 조회한 엔티티가 있으면 .isPresent()
         if (optionalExamEntity.isPresent()) {
             // 3. Optional 객체에서 (영속된)엔티티 꺼내기
             ExamEntity entity = optionalExamEntity.get();
