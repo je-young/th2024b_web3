@@ -1,7 +1,7 @@
-package example.day04.model.dto;
+package example.day04.todo.model.dto;
 
 
-import example.day04.model.entity.TodoEntity;
+import example.day04.todo.model.entity.TodoEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -1,4 +1,4 @@
-package example.day04.model.entity;
+package example.day04.todo.model.entity;
 
 
 import jakarta.persistence.Column;

@@ -1,9 +1,9 @@
-package example.day04.service;
+package example.day04.todo.service;
 
 
-import example.day04.model.dto.TodoDto;
-import example.day04.model.entity.TodoEntity;
-import example.day04.model.repository.TodoRepository;
+import example.day04.todo.model.dto.TodoDto;
+import example.day04.todo.model.entity.TodoEntity;
+import example.day04.todo.repository.TodoRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -144,6 +144,29 @@ public class TodoService {
                 .map(TodoEntity::toDto)
                 .collect(Collectors.toList());
     } // end todoFindByPage
+
+    // 7. 제목 검색 조회1 ( 입력한 값이 *일치* 한 제목 조회 )
+    public List<TodoDto> search1( String title ){
+        // [1 쿼리메소드 ]. JPA 리포지토리에서 내가 만든 추상메소드 사용한다.
+//        return todoRepository.findByTitle( title )
+//                .stream().map( TodoEntity::toDto )
+//                .collect( Collectors.toList() );
+        // [2 네이티브쿼리 ] JPA 리포지토리에서 내가 만든 추상메소드 사용한다.
+        return todoRepository.findByTitleNative( title )
+                .stream().map( TodoEntity::toDto )
+                .collect( Collectors.toList() );
+    } // end search1
+    // 8. 제목 검색 조회2 ( 입력한 값이 *포함* 된 제목 조회 )
+    public List<TodoDto> search2( String title ){
+        // [1 쿼리메소드 ]. JPA 리포지토리에서 내가 만든 추상메소드 사용한다.
+//        return todoRepository.findByTitleContaining( title )
+//                .stream().map( TodoEntity::toDto )
+//                .collect( Collectors.toList() );
+        // [2 네이티브쿼리 ] JPA 리포지토리에서 내가 만든 추상메소드 사용한다.
+        return todoRepository.findByTitleNativeSearch( title )
+                .stream().map( TodoEntity::toDto )
+                .collect( Collectors.toList() );
+    } // end search2
 
 } // end class
 

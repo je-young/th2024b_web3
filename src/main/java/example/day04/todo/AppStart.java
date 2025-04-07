@@ -1,4 +1,4 @@
-package example.day04;
+package example.day04.todo;
 
 
 import org.springframework.boot.SpringApplication;

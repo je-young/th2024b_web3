@@ -1,7 +1,7 @@
-package example.day04.model.entity;
+package example.day04.todo.model.entity;
 
 
-import example.day04.model.dto.TodoDto;
+import example.day04.todo.model.dto.TodoDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
