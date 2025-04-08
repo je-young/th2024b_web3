@@ -11,6 +11,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/day04/todos")
 @RequiredArgsConstructor
+@CrossOrigin("*") // 플러터 dio (web)
 public class TodoController {
 
     private final TodoService todoService;
