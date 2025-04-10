@@ -61,7 +61,7 @@ public interface ManageSuppliesRepository extends JpaRepository<ManageSuppliesEn
 
     // 5-1. 존재 여부 확인 (네이티브 쿼리 - deleteSupply에서 사용 가능)
     @Query(value = "SELECT COUNT(*) > 0 FROM manage_supplies WHERE id = :id", nativeQuery = true)
-    boolean existsByIdNative(@Param("id") Long id);
+    long countByIdNative(@Param("id") Long id);
 
     // 6. 페이징 조회 (네이티브 쿼리 - Pageable 지원 방식)
     //    Spring Data JPA는 네이티브 쿼리에서도 Pageable 파라미터를 인식하여 페이징 처리를 시도함.
@@ -70,8 +70,6 @@ public interface ManageSuppliesRepository extends JpaRepository<ManageSuppliesEn
             countQuery = "SELECT count(*) FROM manage_supplies", // 전체 개수 조회 쿼리
             nativeQuery = true)
     Page<ManageSuppliesEntity> findAllNativePage(Pageable pageable);
-
-
 
 
 } // end interface

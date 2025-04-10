@@ -116,7 +116,7 @@ public class ManageSuppliesService {
 
         // === 네이티브 쿼리 사용 ===
         // 1. 수정 전 존재 여부 확인 (선택적이지만 안전함)
-        if (!manageSuppliesRepository.existsByIdNative(id)) { // 네이티브 존재 확인 메소드 사용
+        if (manageSuppliesRepository.countByIdNative(id) == 0) { // 네이티브 존재 확인 메소드 사용
             throw new EntityNotFoundException("ID " + id + " 에 해당하는 비품을 수정할 수 없습니다. (Native Query)");
         } // end if
 

@@ -15,6 +15,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/supplies") // http://localhost:8080/api/supplies
+@CrossOrigin("*") // 플러터 dio (web)
 public class ManageSuppliesController {
 
     private final ManageSuppliesService manageSuppliesService;
