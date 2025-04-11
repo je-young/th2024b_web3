@@ -1,4 +1,4 @@
-package _비품관리_CRUD;
+package CRUD;
 
 
 import org.springframework.boot.SpringApplication;

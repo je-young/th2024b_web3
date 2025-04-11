@@ -1,7 +1,7 @@
-package _비품관리_CRUD.model.repository;
+package CRUD.model.repository;
 
 
-import _비품관리_CRUD.model.entity.ManageSuppliesEntity;
+import CRUD.model.entity.ManageSuppliesEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

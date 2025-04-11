@@ -1,8 +1,8 @@
-package _비품관리_CRUD.controller;
+package CRUD.controller;
 
 
-import _비품관리_CRUD.model.dto.ManageSuppliesDto;
-import _비품관리_CRUD.service.ManageSuppliesService;
+import CRUD.model.dto.ManageSuppliesDto;
+import CRUD.service.ManageSuppliesService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

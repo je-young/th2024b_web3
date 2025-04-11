@@ -1,4 +1,4 @@
-package _비품관리_CRUD.model.entity;
+package CRUD.model.entity;
 
 
 import jakarta.persistence.Column;

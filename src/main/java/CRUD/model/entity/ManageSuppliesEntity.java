@@ -1,7 +1,7 @@
-package _비품관리_CRUD.model.entity;
+package CRUD.model.entity;
 
 
-import _비품관리_CRUD.model.dto.ManageSuppliesDto;
+import CRUD.model.dto.ManageSuppliesDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

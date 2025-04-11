@@ -1,7 +1,7 @@
-package _비품관리_CRUD.model.dto;
+package CRUD.model.dto;
 
 
-import _비품관리_CRUD.model.entity.ManageSuppliesEntity;
+import CRUD.model.entity.ManageSuppliesEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

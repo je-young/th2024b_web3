@@ -1,9 +1,9 @@
-package _비품관리_CRUD.service;
+package CRUD.service;
 
 
-import _비품관리_CRUD.model.dto.ManageSuppliesDto;
-import _비품관리_CRUD.model.entity.ManageSuppliesEntity;
-import _비품관리_CRUD.model.repository.ManageSuppliesRepository;
+import CRUD.model.dto.ManageSuppliesDto;
+import CRUD.model.entity.ManageSuppliesEntity;
+import CRUD.model.repository.ManageSuppliesRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
