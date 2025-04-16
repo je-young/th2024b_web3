@@ -47,20 +47,32 @@ repositories {
 // - annotationProcessor : 어노테이션 프로세서
 // - runtimeOnly : 런타임에만 사용
 dependencies {
-    // 1. 스프링 웹
+// 1. 스프링 웹
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    // 2. 롬복
+
+// 2. 롬복
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-    // 3. mysql JDBC
+
+// 3. mysql JDBC
     runtimeOnly 'com.mysql:mysql-connector-j'
-    // 4. JPA*
+
+// 4. JPA*
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+// 5. 비크립트 알고리즘 라이브러리
+    implementation 'org.springframework.security:spring-security-crypto:6.4.3'
+
+// 6. J(자바) JJWT 라이브러리
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+
+// 7. Spring Security 라이브러리
+//implementation 'org.springframework.boot:spring-boot-starter-security'
 }
 
 // 7. 테스트 설정
-// - tasks.named('test') : 테스트 태스크
-// - useJUnitPlatform() : JUnit 플랫폼 사용
 tasks.named('test') {
     useJUnitPlatform()
 }
