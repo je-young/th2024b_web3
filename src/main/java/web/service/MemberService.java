@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import web.model.dto.MemberDto;
 import web.model.entity.MemberEntity;
 import web.model.repository.MemberEntityRepository;
+import web.util.JwtUtil;
 
 @Service // Spring MVC2 service
 @RequiredArgsConstructor
@@ -15,6 +16,7 @@ import web.model.repository.MemberEntityRepository;
 // 메서드 안에서 여러가지 SQL 실행할 경우 하나라도 오류가 발생하면 롤백(취소) * JPA 엔티티 수정 필수!
 public class MemberService {
     private final MemberEntityRepository memberEntityRepository;
+    private final JwtUtil jwtUtil; // // JwtUtil 필드 추가
     
     // [1] 회원가입
     public boolean signup(MemberDto memberDto) {
@@ -39,7 +41,7 @@ public class MemberService {
         return false;
     } // end signup
 
-    // [2] 로그인
+    // [2] 로그인 , 로그인 성공시 token 실패시 null
     public String login(MemberDto memberDto) {
         // 1. 이메일(아이디)를 DB에서 조회하여 엔티티 찾기
         MemberEntity memberEntity = memberEntityRepository.findByMemail(memberDto.getMemail());
@@ -52,11 +54,27 @@ public class MemberService {
         boolean inMatch = passwordEncoder.matches(memberDto.getMpwd(), memberEntity.getMpwd());
 
         // 4. 비밀번호 검증 실패이면
-        if(!inMatch == false) { return null; } // 로그인 실패
+        if( inMatch == false ) { return null; } // 로그인 실패
 
-        // 5. 비밀번호 검증 성공이면 ,
-
-
+        // 5. 비밀번호 검증 성공이면 Token 발급
+        String token = jwtUtil.createToken(memberEntity.getMemail());
+        System.out.println(">>> 발급된 token = " + token);
+        return token;
     } // end login
+
+    // [3] 전달받은 token 으로 token 검증하여 유효한 token 은 회원정보(dto) 반환 유효하지 않은 token null 반환
+    public MemberDto info(  String token ){
+        // 1. 전달받은 token 으로 검증하기. vs 세션 호출/검증
+        String memail = jwtUtil.validateToken( token );
+        // 2. 검증이 실패이면 '비로그인중' 이거나 유효기간 만료 , 실패
+        if( memail == null ) return null;
+        // 3. 검증이 성공이면 토큰에 저장된 이메일을 가지고 엔티티 조회
+        MemberEntity memberEntity
+                = memberEntityRepository.findByMemail( memail );
+        // 4. 조회된 엔티티가 없으면 실패
+        if( memberEntity == null ) return null;
+        // 5. 조회 성공시 조회된 엔티티를 dto로 변환하여 반환한다.
+        return memberEntity.toDto();
+    } // end info
 
 } // end MemberService
