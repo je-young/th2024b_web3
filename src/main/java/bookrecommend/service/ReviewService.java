@@ -61,4 +61,31 @@ public class ReviewService {
                 .collect(Collectors.toList());
     } // end getReviewsByBookId
 
+    // [3] 특정 리뷰를 삭제
+    @Transactional // 데이터 변경이 있으므로 @Transactional 필요
+    public  void deleteReview(Long reviewId, String password) {
+
+        // 1. 리뷰 조회 (없음은 예외 발생)
+        Review review = findReviewByIdOrThrow(reviewId);
+
+        // 2. 비밀번호 검증 (틀리면 예외 발생)
+        verifyReviewPassword(password, review.getPassword());
+
+        // 3. 리뷰 삭제
+        reviewRepository.delete(review);
+    } // end deleteReview
+
+    // [4] ID로 리뷰를 조회하고 없으면 예외 발생시키는 Helper 메소드
+    private Review findReviewByIdOrThrow(Long reviewId) {
+        return reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 리뷰을 찾을 수 없습니다: " + reviewId));
+    } // end findReviewByIdOrThrow
+
+    // [5] 입력된 비밀번호와 저장된 암호화된 비밀번호를 비교하는 Helper 메소드
+    private void verifyReviewPassword(String rawPassword, String encodedPassword) {
+        if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
+            throw new IllegalArgumentException("리뷰 비밀번호가 일치하지 않습니다.");
+        } // end if
+    } // end verifyReviewPassword
+
 } // end class

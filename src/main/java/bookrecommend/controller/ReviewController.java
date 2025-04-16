@@ -37,11 +37,27 @@ public class ReviewController {
         return ResponseEntity.ok(reviews);
     } // end getReviewsByBookId
 
+    // [3] 특정 리뷰 삭제 API (비밀번호는 Query Parameter 로 받음)
+    @DeleteMapping("/reviews/{reviewId}") // [DELETE] "http://localhost:8080/api/reviews/1?password=reviewpass1 (ID 1번 리뷰 삭제)"
+    public ResponseEntity<Void> deleteReview(
+            @PathVariable Long reviewId,
+            @RequestParam String password) {
+        reviewService.deleteReview(reviewId, password);
+        return ResponseEntity.noContent().build(); // HTTP 204 No Content 반환
+    } // end deleteReview
+
     // [3] ReviewService 에서 IllegalArgumentException 발생 시 처리할 핸들러
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException e) {
-        // 여기서는 책 ID 관련 예외만 발생 가능성이 높으므로 NOT_FOUND 로 처리
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        // 메시지 내용에 따라 상태 코드를 다르게 설정
+        if (e.getMessage().contains("찾을 수 없습니다")) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } else if (e.getMessage().contains("비밀번호")) { // 비밀번호 관련 오류 메시지 포함 시
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } else {
+            // 기타 IllegalArgumentException (예상치 못한 경우)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청입니다: " + e.getMessage());
+        } // end if
     } // end handleIllegalArgumentException
 
 } // end class
