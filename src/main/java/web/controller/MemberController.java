@@ -36,7 +36,18 @@ public class MemberController {
     // @PathVariable : HTTP 헤더의 경로 값 매핑 하는 어노테이션
     public MemberDto info( @RequestHeader("Authorization") String token ) {
         return memberService.info(token);
-
     } // end info
+
+    // [4] 로그아웃
+    @GetMapping("/logout") // http://localhost:8080/member/logout
+    public void logout( @RequestHeader("Authorization") String token ) {
+        memberService.logout(token);
+    } // end logout
+
+    // [5] 최근 24시간 로그인 한 접속자 수
+    @GetMapping("/login/count") // http://localhost:8080/member/login/count
+    public int loginCount() {
+        return memberService.loginCount();
+    } // end loginCount
 
 } // end MemberController
