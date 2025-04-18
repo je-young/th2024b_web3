@@ -6,7 +6,6 @@ package bookrecommend.controller;
 import bookrecommend.model.dto.BookCreateRequest;
 import bookrecommend.model.dto.BookResponse;
 import bookrecommend.model.dto.BookUpdateRequest;
-import bookrecommend.model.dto.PasswordRequest;
 import bookrecommend.service.BookService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,6 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*") // CORS
 public class BookController {
 
     private final BookService bookService;

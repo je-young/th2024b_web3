@@ -16,6 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api") // 기본 경로 URL : "http://localhost:8080/api"
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*") // CORS
 public class ReviewController {
 
     private final ReviewService reviewService;
