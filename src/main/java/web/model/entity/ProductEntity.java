@@ -16,7 +16,7 @@ import java.util.List;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductEntity {
+public class ProductEntity extends BaseTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long pno; // 제품 식별번호
@@ -45,7 +45,7 @@ public class ProductEntity {
     private CategoryEntity categoryEntity;
 
     // * 양방향 :
-    @OneToMany(mappedBy = "productEntity , cascade = CascadeType.ALL , fetch = FetchType.LAZY)")
+    @OneToMany(mappedBy = "productEntity" , cascade = CascadeType.ALL , fetch = FetchType.LAZY)
     @ToString.Exclude // 순환참조 방지
     @Builder.Default // 빌더패턴 사용시 리스트 초기화
     private List<ImgEntity> imgEntityList = new ArrayList<>();

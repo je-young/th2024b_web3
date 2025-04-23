@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 @Builder
-public class MemberEntity {
+public class MemberEntity extends BaseTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // auto_increment
     private int mno; // 회원번호
