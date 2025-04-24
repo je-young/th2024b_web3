@@ -2,18 +2,16 @@ package web.controller;
 
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import web.model.dto.CategoryDto;
 import web.model.dto.ProductDto;
-import web.model.entity.ProductEntity;
+
 import web.service.MemberService;
 import web.service.ProductService;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/product")
@@ -31,7 +29,9 @@ public class ProductController {
             토큰( Authorizstion ) , 등록할 값들( pname , pcontent , pprice , 여러개사진들 , cno )
         3. boolean 반환
      */
-    @PostMapping("/register")
+    @PostMapping("/register") // [POST] http://localhost:8080/product/register
+    // { "pname":"test", "pcontent":"test", "pprice":1000, "files":[], "cno":1 }
+    // Authorization : 토큰값 // Content-Type: multipart/form-data
     public ResponseEntity<Boolean> registerProduct(
             @RequestHeader("Authorization") String token, // - 토큰 받기
             @ModelAttribute ProductDto productDto) { // - multipart/form(첨부파일) 받기
@@ -52,7 +52,7 @@ public class ProductController {
     } // end registerProduct
 
 //    // 2. (카테고리별) 제품 전체조회 : 설계 : (카테고리조회)?cno=3  , (전체조회)?cno
-//    @GetMapping("/all")
+//    @GetMapping("/all") // [Get] http://localhost:8080/product/all
 //    public ResponseEntity<List<ProductDto>> allProducts(
 //            @RequestParam(required = false) long cno) { // required = false : cno 는 필수는 아니다 뜻.
 //        List<ProductDto> productDtoList = productService.allProducts(cno);
@@ -60,7 +60,7 @@ public class ProductController {
 //    } // end allProducts
 
     // 3. 제품 개별조회 : 설계 : ?pno=1
-    @GetMapping("/view")
+    @GetMapping("/view") // [Get] http://localhost:8080/product/view?pno=1
     public ResponseEntity<ProductDto> viewProduct(@RequestParam long pno) { // required 생략시 pno 필수
         ProductDto productDto = productService.viewProduct(pno);
         if (productDto == null) {
@@ -71,7 +71,7 @@ public class ProductController {
     } // end viewProduct
 
     // 4. 제품 개별삭제 : 설계 : 토큰 , 삭제할제품번호
-    @DeleteMapping("/delete")
+    @DeleteMapping("/delete") // [Delete] http://localhost:8080/product/delete?pno=1
     public ResponseEntity<Boolean> deleteProduct(
             @RequestHeader("Authorization") String token,
             @RequestParam int pno) {
@@ -96,7 +96,13 @@ public class ProductController {
      * 매핑 : Put , /product/update , boolean
      * 매개변수 : 수정할 값 ( pname , pcontent , pprice , cno , files ) , 수정할 대상 : pno , 권한 : (token)
      */
-    @PutMapping("/update")
+    @PutMapping("/update") // [Put] http://localhost:8080/product/update
+    // Authorization : 토큰값 // Content-Type: multipart/form-data
+    // Body (form-data) :
+        // pno : 수정할 제품 번호 ,
+        // pname, pcontent,
+        // pprice, cno : 수정할 값들
+        // files : 새로 추가할 이미지들 (선택)
     public ResponseEntity<Boolean> updateProduct(
             @RequestHeader("Authorization") String token,
             @ModelAttribute ProductDto productDto) {
@@ -120,7 +126,8 @@ public class ProductController {
      *   매핑 : Delete , /product/image , boolean
      *   매개변수 : 삭제할 대상 : ino , 권한 : (token)
      * */
-    @DeleteMapping("/image")
+    @DeleteMapping("/image") // [Delete] http://localhost:8080/product/image?ino=3
+    // Authorization : 토큰값
     public ResponseEntity<Boolean> deleteImage(
             @RequestParam("ino") long ino,
             @RequestHeader("Authorization") String token) {
@@ -136,7 +143,7 @@ public class ProductController {
     /* 매핑 : Get , /product/category , List<CategoryDto>
         매개변수 : x
      */
-    @GetMapping("/category")
+    @GetMapping("/category") // [Get] http://localhost:8080/product/category
     public ResponseEntity<List<CategoryDto> > allCategory(){
         List< CategoryDto > categoryDtoList = productService.allCategory();
         return ResponseEntity.status( 200 ).body( categoryDtoList );
@@ -146,7 +153,7 @@ public class ProductController {
     /*  매핑 : Get , /product/all , List<ProductDto>
         매개변수 : cno(없으면전체조회) , page(현재페이지번호없으면1페이지) , keyword(없으면전체조회)
     */
-    @GetMapping("/all")
+    @GetMapping("/all") // [Get] http://localhost:8080/product/all?page=1&size=5&keyword=전자제품&cno=1
     public ResponseEntity< List<ProductDto> > allProducts(
             @RequestParam( required = false ) Long cno , //  cno : 카테고리 번호 , long(기본타입)  Long(참조타입)
             @RequestParam( defaultValue = "1" ) int page , // page : 조회할 현재페이지 번호 , defaultValue="기본값"
