@@ -32,37 +32,37 @@ public class ProductService {
     private final ImgEntityRepository imgEntityRepository;
 
     // 1. 제품등록
-    public boolean registerProduct(ProductDto productDto , int loginMno) {
+    public boolean registerProduct(ProductDto productDto, int loginMno) {
         // 1. 현재 회원번호의 엔티티 찾기 ( 연관관계 ) FK , Optional : null 값 제어 기능 제공
-        Optional<MemberEntity > optionalMemberEntity = memberEntityRepository.findById( loginMno );
-        if( optionalMemberEntity.isEmpty() ) return false;  // 만약에 조회된 회원엔티티가 없으면 false
+        Optional<MemberEntity> optionalMemberEntity = memberEntityRepository.findById(loginMno);
+        if (optionalMemberEntity.isEmpty()) return false;  // 만약에 조회된 회원엔티티가 없으면 false
         // 2. 현재 카테고리번호의 엔티티 찾기 ( 연관관계 ) FK
         Optional<CategoryEntity> optionalCategoryEntity = categoryEntityRepository.findById(productDto.getCno());
-        if( optionalCategoryEntity.isEmpty() ) return false; // 만야겡 조회된 카테고리엔티티가 없으면 false
+        if (optionalCategoryEntity.isEmpty()) return false; // 만야겡 조회된 카테고리엔티티가 없으면 false
         // 3. ProductDto 를 ProductEntity 변환.
         ProductEntity productEntity = productDto.toEntity();
         // 4. * 단방향 관계 (FK) 주입 , cno[x] --> CategoryEntity *
-        productEntity.setMemberEntity( optionalMemberEntity.get() );
-        productEntity.setCategoryEntity( optionalCategoryEntity.get() );
+        productEntity.setMemberEntity(optionalMemberEntity.get());
+        productEntity.setCategoryEntity(optionalCategoryEntity.get());
         // 5. 영속성 연결
-        ProductEntity saveEntity = productEntityRepository.save( productEntity );
-        if( saveEntity.getPno() <= 0 ) return  false; // 제품번호가 0 이하 이면 실패
+        ProductEntity saveEntity = productEntityRepository.save(productEntity);
+        if (saveEntity.getPno() <= 0) return false; // 제품번호가 0 이하 이면 실패
         // 6. 파일 처리 , 첨부파일이 비어있지 않으면 업로드 진행
-        if( productDto.getFiles() != null && !productDto.getFiles().isEmpty() ){
+        if (productDto.getFiles() != null && !productDto.getFiles().isEmpty()) {
             // 6-1 : 여러개 첨부파일 이므로 반복문활용
-            for (MultipartFile file : productDto.getFiles() ){
+            for (MultipartFile file : productDto.getFiles()) {
                 // 6-2 : FileUtil 에서 업로드 메소드 호출 ( web2 에서 만든 함수들 )
-                String saveFileName = fileUtil.fileUpload( file );
+                String saveFileName = fileUtil.fileUpload(file);
                 // 6-3 : * 만약에 업로드 실패하면 트랜잭션 롤백 *  @Transactional
-                if( saveFileName == null ){ // 6-4 : 강제 예외 발생 해서 트랜잭션 롤백하기.
+                if (saveFileName == null) { // 6-4 : 강제 예외 발생 해서 트랜잭션 롤백하기.
                     throw new RuntimeException("업로드 중에 오류 발생");
                 }
                 // 6-4 : 업로드 성공했으면 ImgEntity 만들기 , 업로드한 파일명 넣기
-                ImgEntity imgEntity = ImgEntity.builder().iname( saveFileName ).build();
+                ImgEntity imgEntity = ImgEntity.builder().iname(saveFileName).build();
                 // 6-5 : * 단방향 관계 (FK) 주입 , pno[x] --> productEntity *
-                imgEntity.setProductEntity( saveEntity );
+                imgEntity.setProductEntity(saveEntity);
                 // 6-6 : ImgEntity 영속화
-                imgEntityRepository.save( imgEntity );
+                imgEntityRepository.save(imgEntity);
             }
         }
         // 7. 성공 반환
@@ -76,12 +76,12 @@ public class ProductService {
         // 2. cno 에 따라 카테고리별 조회 vs 전체조회
         if (cno != null) { // 2-1 : 카테고리별 조회
             productEntityList = productEntityRepository.findByCategoryEntityCno(cno);
-        }else { // 2-2 : 전체조회
+        } else { // 2-2 : 전체조회
             productEntityList = productEntityRepository.findAll();
         } // end if
         // 3. 조회한 결과 entity 를 dto 로 변환
         return productEntityList.stream()
-                .map(ProductDto :: toDto)
+                .map(ProductDto::toDto)
                 .collect(Collectors.toList());
     } // end allProducts
 
@@ -100,7 +100,7 @@ public class ProductService {
     } // end viewProduct
 
     // 4. 제품 개별삭제 , + 이미지 삭제
-    public boolean deleteProduct(long pno , int loginMno){
+    public boolean deleteProduct(long pno, int loginMno) {
         // 1. pno 에 해당 하는 엔티티 찾기
         Optional<ProductEntity> productEntityOptional = productEntityRepository.findById(pno);
         // 2. 없으면 false
@@ -124,6 +124,45 @@ public class ProductService {
         productEntityRepository.deleteById(pno);
         return true;
     } // end deleteProduct
+
+    // 5. 제품 수정 ( + 이미지 추가 )
+    public boolean updateProduct(ProductDto productDto, int loginMno) {
+        // 1. 기존의 제품 정보(엔티티) 가져오기 // Optional 클래스는 null 제어 메소드 제공
+        Optional<ProductEntity> productEntityOptional = productEntityRepository.findById(productDto.getPno());
+        if (productEntityOptional.isEmpty()) return false; // 조회 엔티티가 없으면
+        ProductEntity productEntity = productEntityOptional.get();
+
+        // 2. 현재 토큰(로그인) 사람의 등록한 제품인지 인가확인 // 아니면 취소
+        if (productEntity.getMemberEntity().getMno() != loginMno) return false;
+
+        // 3. 현재 수정할 카테고리 엔티티 가져오기 // 없으면 취소
+        Optional<CategoryEntity> categoryEntityOptional = categoryEntityRepository.findById(productDto.getCno());
+        if (categoryEntityOptional.isEmpty()) return false;
+        CategoryEntity categoryEntity = categoryEntityOptional.get();
+
+        // 4. 제품 정보를 수정한다. // 오류 발생시 롤백한다.
+            // - 조회한 기존의 제품 정보(엔티티) 에서 set 이용한 수정
+            productEntity.setPname(productDto.getPname());
+            productEntity.setPcontent(productDto.getPcontent());
+            productEntity.setPprice(productDto.getPprice());
+            productEntity.setCategoryEntity(categoryEntity); // 찾은 엔티티
+
+        // 5. 새로운 이미지가 있으면 fileUtil 에서 업로드 함수 이용하여 업로드한다. // 오류 발생시 롤백한다.
+        List<MultipartFile> newFile = productDto.getFiles();
+        if (newFile != null && !newFile.isEmpty()) { // 새로운 이미지가 존재하면
+            for (MultipartFile file : newFile) {
+                String savefileName = fileUtil.fileUpload(file);
+                if (savefileName == null) throw new RuntimeException("파일 업로드 오류발생"); // throw new 예외클래스명(); // 강제 예외 발생했다.
+                // 새 이미지 처리
+                ImgEntity imgEntity = ImgEntity.builder()
+                        .iname(savefileName)
+                        .productEntity(productEntity)
+                        .build();
+                imgEntityRepository.save(imgEntity); // 이미지 엔티티 저장(영속) , 자바객체 <--영속--> DB테이블레코드
+            } // end for
+        } // end if
+        return true; // 6. 끝
+    } // end updateProduct
 
 
 } // end ProductService class
