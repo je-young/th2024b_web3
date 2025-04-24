@@ -19,7 +19,7 @@ public class FileUtil {
 
     // 1. 현재 프로젝트 최상위 디렉토리(폴더) 경로 찾기
     String baseDir = System.getProperty("user.dir"); // 현재 작업중인 최상위(프로젝트 절대경로) 폴더를 반환한다.
-    String uploadPath = baseDir + "/build/resources/main/static/upload";
+    String uploadPath = baseDir + "/build/resources/main/static/upload/";
 
     // [1] 업로드 : 스프링에서는 MultipartFile 인터페이스 지원하므로써 파일 업로드 지원
     public String fileUpload( MultipartFile multipartFile ) { // (1) 매개변수로 'MultipartFile' 인터페이스 타입을 받는다.

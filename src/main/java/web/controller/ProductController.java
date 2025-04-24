@@ -2,13 +2,18 @@ package web.controller;
 
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import web.model.dto.CategoryDto;
 import web.model.dto.ProductDto;
+import web.model.entity.ProductEntity;
 import web.service.MemberService;
 import web.service.ProductService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/product")
@@ -46,13 +51,13 @@ public class ProductController {
         return ResponseEntity.status(201).body(true); // 201 (저장) 요청성공 과 true-return
     } // end registerProduct
 
-    // 2. (카테고리별) 제품 전체조회 : 설계 : (카테고리조회)?cno=3  , (전체조회)?cno
-    @GetMapping("/all")
-    public ResponseEntity<List<ProductDto>> allProducts(
-            @RequestParam(required = false) long cno) { // required = false : cno 는 필수는 아니다 뜻.
-        List<ProductDto> productDtoList = productService.allProducts(cno);
-        return ResponseEntity.status(200).body(productDtoList); // 200 성공 과 값 반환
-    } // end allProducts
+//    // 2. (카테고리별) 제품 전체조회 : 설계 : (카테고리조회)?cno=3  , (전체조회)?cno
+//    @GetMapping("/all")
+//    public ResponseEntity<List<ProductDto>> allProducts(
+//            @RequestParam(required = false) long cno) { // required = false : cno 는 필수는 아니다 뜻.
+//        List<ProductDto> productDtoList = productService.allProducts(cno);
+//        return ResponseEntity.status(200).body(productDtoList); // 200 성공 과 값 반환
+//    } // end allProducts
 
     // 3. 제품 개별조회 : 설계 : ?pno=1
     @GetMapping("/view")
@@ -68,7 +73,7 @@ public class ProductController {
     // 4. 제품 개별삭제 : 설계 : 토큰 , 삭제할제품번호
     @DeleteMapping("/delete")
     public ResponseEntity<Boolean> deleteProduct(
-            @RequestHeader("Authorezation") String token,
+            @RequestHeader("Authorization") String token,
             @RequestParam int pno) {
         // 1. 권한 확인
         int loginMno;
@@ -78,9 +83,9 @@ public class ProductController {
             return ResponseEntity.status(401).body(false);
         } // end try catch
         // 2.
-        boolean reqult = productService.deleteProduct(pno, loginMno);
+        boolean result = productService.deleteProduct(pno, loginMno);
         // 3.
-        if (reqult == false) return ResponseEntity.status(400).body(false);
+        if (result == false) return ResponseEntity.status(400).body(false);
         // 4.
         return ResponseEntity.status(200).body(true);
     } // end deleteProduct
@@ -115,17 +120,40 @@ public class ProductController {
      *   매핑 : Delete , /product/image , boolean
      *   매개변수 : 삭제할 대상 : ino , 권한 : (token)
      * */
+    @DeleteMapping("/image")
+    public ResponseEntity<Boolean> deleteImage(
+            @RequestParam("ino") long ino,
+            @RequestHeader("Authorization") String token) {
+        int loginMno;
+        try { loginMno = memberService.info(token).getMno();
+        } catch (Exception e) { return ResponseEntity.status(401).body(false); }
+        boolean result = productService.deleteImage(ino, loginMno);
+        if (result == false) return ResponseEntity.status(400).body(false);
+        return ResponseEntity.status(200).body(true);
+    }
 
     // 7. 카테고리 조회
-    /**
-     *   매핑 : Get , /product/category , List< CategoryDto >
-     *   매개변수 : X
-     * */
+    /* 매핑 : Get , /product/category , List<CategoryDto>
+        매개변수 : x
+     */
+    @GetMapping("/category")
+    public ResponseEntity<List<CategoryDto> > allCategory(){
+        List< CategoryDto > categoryDtoList = productService.allCategory();
+        return ResponseEntity.status( 200 ).body( categoryDtoList );
+    } // end allCategory
 
-    // 2. 검색 + 페이징 처리 , 위에서 작업한 2번 메소드 주석처리 후 진행. ( 웹/앱 : 무한스크롤 )
-    /**
-     *   매핑 : Get , /product/all , List< ProductDto >
-     매개변수 : cno(없으면 전체조회) , page(현재페이지번호 없으면 1페이지) , keyword(없으면 전체조회)
-     * */
+    // 2. 검색+페이징처리 , 위에서 작업한 2번 메소드 주석처리 후 진행. ( + 웹/앱 : 무한스크롤 )
+    /*  매핑 : Get , /product/all , List<ProductDto>
+        매개변수 : cno(없으면전체조회) , page(현재페이지번호없으면1페이지) , keyword(없으면전체조회)
+    */
+    @GetMapping("/all")
+    public ResponseEntity< List<ProductDto> > allProducts(
+            @RequestParam( required = false ) Long cno , //  cno : 카테고리 번호 , long(기본타입)  Long(참조타입)
+            @RequestParam( defaultValue = "1" ) int page , // page : 조회할 현재페이지 번호 , defaultValue="기본값"
+            @RequestParam( defaultValue = "5") int size ,  // size : 페이지당 게시물수
+            @RequestParam( required = false ) String keyword ){  // keyword : (제품명) 검색어
+        List<ProductDto> productDtoList = productService.allProducts( cno , page, size , keyword );
+        return ResponseEntity.status( 200 ).body( productDtoList );
+    } // end allProducts
 
 } // end class

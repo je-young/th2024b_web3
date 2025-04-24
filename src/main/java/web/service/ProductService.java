@@ -3,8 +3,13 @@ package web.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import web.model.dto.CategoryDto;
 import web.model.dto.ProductDto;
 import web.model.entity.CategoryEntity;
 import web.model.entity.ImgEntity;
@@ -69,21 +74,21 @@ public class ProductService {
         return true;
     } // end registerProduct
 
-    // 2. (카테고리별) 제품 전체조회 : 설계 (카테고리조회)?cno=3 , (전체조회)?cno
-    public List<ProductDto> allProducts(Long cno) {
-        // 1. 조회된 결과를 저장하는 리스트 변수
-        List<ProductEntity> productEntityList;
-        // 2. cno 에 따라 카테고리별 조회 vs 전체조회
-        if (cno != null) { // 2-1 : 카테고리별 조회
-            productEntityList = productEntityRepository.findByCategoryEntityCno(cno);
-        } else { // 2-2 : 전체조회
-            productEntityList = productEntityRepository.findAll();
-        } // end if
-        // 3. 조회한 결과 entity 를 dto 로 변환
-        return productEntityList.stream()
-                .map(ProductDto::toDto)
-                .collect(Collectors.toList());
-    } // end allProducts
+//    // 2. (카테고리별) 제품 전체조회 : 설계 (카테고리조회)?cno=3 , (전체조회)?cno
+//    public List<ProductDto> allProducts(Long cno) {
+//        // 1. 조회된 결과를 저장하는 리스트 변수
+//        List<ProductEntity> productEntityList;
+//        // 2. cno 에 따라 카테고리별 조회 vs 전체조회
+//        if (cno != null) { // 2-1 : 카테고리별 조회
+//            productEntityList = productEntityRepository.findByCategoryEntityCno(cno);
+//        } else { // 2-2 : 전체조회
+//            productEntityList = productEntityRepository.findAll();
+//        } // end if
+//        // 3. 조회한 결과 entity 를 dto 로 변환
+//        return productEntityList.stream()
+//                .map(ProductDto::toDto)
+//                .collect(Collectors.toList());
+//    } // end allProducts
 
     // 3. 제품 개별조회 : 설계 : ?pno=1
     public ProductDto viewProduct(long pno) {
@@ -164,5 +169,48 @@ public class ProductService {
         return true; // 6. 끝
     } // end updateProduct
 
+    // 6. 이미지 개별 삭제
+    public boolean deleteImage( long ino , int loginMno ){
+        // 1. 이미지 엔티티 조회
+        Optional<ImgEntity> optionalImgEntity  = imgEntityRepository.findById( ino );
+        if( optionalImgEntity.isEmpty() ) return false;
+        ImgEntity imgEntity = optionalImgEntity.get();
+        // 2. 인가 확인 , 이미지 등록한 회원 == 제품을 등록한 회원
+        if( imgEntity.getProductEntity().getMemberEntity().getMno() != loginMno ) return false;
+        // 3. 물리적인 로컬 삭제.
+        String deleteFileName = imgEntity.getIname();
+        boolean result = fileUtil.fileDelete( deleteFileName );
+        if( result == false  ) throw new RuntimeException("파일 삭제 실패 ");
+        // 4. 엔티티 삭제
+        imgEntityRepository.deleteById( ino );
+        return true; // 5. 끝
+    } // end deleteImage
+
+    // 7. 카테고리 조회
+    public List<CategoryDto> allCategory(){
+        // 1. 모든 카테고리 조회
+        List<CategoryEntity> categoryEntityList = categoryEntityRepository.findAll();
+        // 2. List<Entity> --> List<Dto> 변환
+        List<CategoryDto> categoryDtoList = categoryEntityList.stream()
+                .map( CategoryDto::toDto )
+                .collect( Collectors.toList() );
+        // 3. 끝
+        return categoryDtoList;
+    } // end allCategory
+
+    // 2. 검색+페이징처리 , 위에서 작업한 2번 메소드 주석처리 후 진행
+    public List<ProductDto> allProducts( Long cno , int page , int size , String keyword ){
+        // 1. 페이징처리 설정 ,  page-1 : 1페이지를 0으로 사용하므로 -1  , size : 페이지당자료개수 , pno 기준으로 내림차순
+        Pageable pageable = PageRequest.of( page-1 , size , Sort.by(  Sort.Direction.DESC , "pno")  );
+        // Pageable : 인터페이스 ,  import org.springframework.data.domain.Pageable;
+        // PageRequest : 클래스(구현체)   // .of( 페이지번호[0부터] , 페이지별자료수 , 정렬 )
+        // 2. 내가 만든 네이티브 쿼리로 엔티티 조회
+        // 예시] 전체조회 productEntityRepository.findAll( pageable );
+        // 예시] 카테고리별조회 : productEntityRepository.만든함수명( pageable );
+        Page<ProductEntity> productEntities = productEntityRepository.findBySearch( cno , keyword , pageable );
+        // 3. 반환타입
+        List<ProductDto> productDtoList = productEntities.stream().map( ProductDto::toDto ).collect( Collectors.toList() );
+        return productDtoList; // 4. 끝
+    } // end allProducts
 
 } // end ProductService class
